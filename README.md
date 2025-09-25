@@ -2,6 +2,11 @@
 
 > **Level Up Your Real Life** - Transform your physical and mental fitness into an epic RPG adventure!
 
+https://img.shields.io/badge/Singularity-Personal%2520Evolution%2520Platform-blue
+https://img.shields.io/badge/version-1.0.0-green
+https://img.shields.io/badge/python-3.8%252B-blue
+https://img.shields.io/badge/react-18.2.0-61dafb
+
 ## 🌟 Overview
 
 Singularity is a gamified personal development platform that turns real-world exercises and activities into an immersive RPG experience. Track your fitness, learning, and wellness journey while leveling up your character across four core attributes: **Strength**, **Agility**, **Vitality**, and **Intelligence**.
