@@ -3,10 +3,12 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from ..models.user import UserCreate, UserLogin, UserResponse
 from ..services.user_service import UserService, UserServiceError
+from ..services.database import get_database
 from ..auth.auth_handler import (
     verify_token, create_access_token, create_refresh_token, validate_password_strength
 )
-from datetime import timedelta
+from datetime import timedelta, datetime
+from bson import ObjectId
 import time
 import logging
 
@@ -96,11 +98,14 @@ async def login(login_data: UserLogin, request: Request):
             raise HTTPException(status_code=401, detail="Invalid credentials")
         
         # Update last login
-        db = get_database()
-        await db.users.update_one(
-            {"_id": ObjectId(user["id"])},
-            {"$set": {"last_login": datetime.utcnow()}}
-        )
+        try:
+            db = get_database()
+            await db.users.update_one(
+                {"_id": ObjectId(user["id"])},
+                {"$set": {"last_login": datetime.utcnow()}}
+            )
+        except Exception as e:
+            logger.warning(f"Could not update last login: {e}")
         
         access_token = create_access_token(data={"email": user["email"]})
         refresh_token = create_refresh_token(data={"email": user["email"]})

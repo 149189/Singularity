@@ -60,10 +60,14 @@ class UserService:
             
             db = get_database()
             
-            # Check if user already exists
-            existing_user = await db.users.find_one({"email": user_data["email"].lower()})
-            if existing_user:
+            # Check if user already exists (by email and username)
+            existing_email = await db.users.find_one({"email": user_data["email"].lower()})
+            if existing_email:
                 raise UserServiceError("Email already registered")
+            
+            existing_username = await db.users.find_one({"username": user_data["username"]})
+            if existing_username:
+                raise UserServiceError("Username already taken")
             
             # Hash password and clean up data
             user_data["hashed_password"] = get_password_hash(user_data["password"])
@@ -72,22 +76,19 @@ class UserService:
             
             # Initialize game attributes with better defaults
             class_bonuses = {
-                "warrior": {"strength": 3, "vitality": 2},
-                "mage": {"intelligence": 3, "vitality": 1},
-                "rogue": {"agility": 3, "intelligence": 1},
-                "cleric": {"vitality": 2, "intelligence": 2, "strength": 1}
+                "warrior": {"strength": 3, "vitality": 2, "agility": 1, "intelligence": 1},
+                "mage": {"intelligence": 3, "vitality": 1, "strength": 1, "agility": 1},
+                "rogue": {"agility": 3, "intelligence": 1, "strength": 1, "vitality": 1},
+                "cleric": {"vitality": 2, "intelligence": 2, "strength": 1, "agility": 1}
             }
             
-            bonus = class_bonuses.get(user_data.get("user_class", "warrior"), {"strength": 1})
-            base_attributes = {"strength": 1, "agility": 1, "vitality": 1, "intelligence": 1}
-            
-            for attr, value in bonus.items():
-                base_attributes[attr] += value
+            user_class = user_data.get("user_class", "warrior")
+            attributes = class_bonuses.get(user_class, class_bonuses["warrior"])
             
             user_data.update({
                 "level": 1,
                 "experience": 0,
-                "attributes": base_attributes,
+                "attributes": attributes,
                 "energy": 100,
                 "max_energy": 100,
                 "gold": 100,  # Starting gold
@@ -107,7 +108,8 @@ class UserService:
             raise
         except Exception as e:
             logger.error(f"Error creating user: {e}")
-            raise UserServiceError("User creation failed")
+            logger.error(f"User data: {user_data}")
+            raise UserServiceError(f"User creation failed: {str(e)}")
 
     @staticmethod
     async def update_user_stats(user_id: str, experience_gained: int, attributes_gained: dict) -> bool:

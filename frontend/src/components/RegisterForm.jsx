@@ -18,8 +18,21 @@ const RegisterForm = ({ onToggleMode }) => {
     setLoading(true);
     setError('');
 
+    // Basic validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      setLoading(false);
+      return;
+    }
+
+    console.log('Submitting registration data:', {
+      ...formData,
+      password: '[HIDDEN]'
+    });
+
     const result = await register(formData);
     if (!result.success) {
+      console.error('Registration failed:', result.error);
       setError(result.error);
     }
     setLoading(false);
@@ -45,6 +58,7 @@ const RegisterForm = ({ onToggleMode }) => {
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:border-white"
               required
+              minLength={3}
             />
           </div>
           
@@ -54,10 +68,10 @@ const RegisterForm = ({ onToggleMode }) => {
               onChange={(e) => setFormData({ ...formData, user_class: e.target.value })}
               className="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:outline-none focus:border-white"
             >
-              <option value="warrior">Warrior</option>
-              <option value="mage">Mage</option>
-              <option value="rogue">Rogue</option>
-              <option value="cleric">Cleric</option>
+              <option value="warrior" className="text-black">Warrior</option>
+              <option value="mage" className="text-black">Mage</option>
+              <option value="rogue" className="text-black">Rogue</option>
+              <option value="cleric" className="text-black">Cleric</option>
             </select>
           </div>
         </div>
@@ -70,6 +84,7 @@ const RegisterForm = ({ onToggleMode }) => {
             onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
             className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:border-white"
             required
+            minLength={2}
           />
         </div>
         
@@ -87,12 +102,16 @@ const RegisterForm = ({ onToggleMode }) => {
         <div>
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Password (min 8 characters)"
             value={formData.password}
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             className="w-full p-3 rounded-lg bg-white/20 text-white placeholder-white/70 border border-white/30 focus:outline-none focus:border-white"
             required
+            minLength={8}
           />
+          <p className="text-white/60 text-sm mt-1">
+            Password must contain uppercase, lowercase, number, and be 8+ characters
+          </p>
         </div>
         
         <button

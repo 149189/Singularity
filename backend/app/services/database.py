@@ -1,6 +1,7 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from dotenv import load_dotenv
+import traceback
 
 load_dotenv()
 
@@ -29,6 +30,7 @@ async def connect_to_mongo():
         
     except Exception as e:
         print(f"❌ MongoDB connection failed: {e}")
+        traceback.print_exc() 
         print("📝 Make sure MongoDB is running on localhost:27017")
         # Don't raise exception - let the app start without DB for testing
         print("⚠️  App will continue without database connection")
