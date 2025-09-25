@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import auth  #, exercises, game  # Comment out non-existent routes for now
+from .routes import auth
 from .services.database import connect_to_mongo, close_mongo_connection
 
 app = FastAPI(title="Singularity API", version="1.0.0")
@@ -8,20 +8,21 @@ app = FastAPI(title="Singularity API", version="1.0.0")
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Vite default
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers (only auth for now)
+# Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-# app.include_router(exercises.router, prefix="/api/exercises", tags=["Exercises"])
-# app.include_router(game.router, prefix="/api/game", tags=["Game"])
 
 @app.on_event("startup")
 async def startup_event():
-    await connect_to_mongo()
+    try:
+        await connect_to_mongo()
+    except Exception as e:
+        print(f"⚠️  Starting without database connection: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_event():
